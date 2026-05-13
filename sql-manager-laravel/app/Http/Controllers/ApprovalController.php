@@ -10,19 +10,23 @@ class ApprovalController extends Controller
     // GET /approve
     // → pending状態の申請一覧を表示
     public function index()
-    {
-        // pendingの申請を全部取得
-        // ヒント：SqlRequest::where('status', 'pending')->____()->get()
-        // with('user')でリレーションも一緒に取得できる
-        $pendingRequests = SqlRequest::where('status', 'pending')-> with('user')->get();
+        {
+            // approverじゃなかったら403を返す
+            if (auth()->user()->role !== 'approver') {
+                abort(403);
+            }
 
-        return view('approve', compact('pendingRequests'));
-    }
+            $pendingRequests = SqlRequest::where('status', 'pending')->with('user')->get();
+            return view('approve', compact('pendingRequests'));
+        }
 
     // POST /approve/{id}
     // → 申請を承認する
     public function approve($id)
     {
+        if (auth()->user()->role !== 'approver') {
+        abort(403);
+    }
         $sqlRequest = SqlRequest::findOrFail($id);
         $sqlRequest->status = 'approved';
         $sqlRequest->save();
@@ -35,6 +39,9 @@ class ApprovalController extends Controller
     // → 申請を拒否する
     public function reject($id)
     {
+        if (auth()->user()->role !== 'approver') {
+        abort(403);
+    }
         $sqlRequest = SqlRequest::findOrFail($id);
         $sqlRequest->status = 'rejected';
         $sqlRequest->save();
