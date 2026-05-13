@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
 use App\Models\SqlRequest;
 
 class ApprovalController extends Controller
@@ -31,6 +32,13 @@ class ApprovalController extends Controller
         $sqlRequest->status = 'approved';
         $sqlRequest->save();
 
+        AuditLog::create([
+            'done_by' => auth()->id(),
+            'request_id' => $sqlRequest->id,
+            'action' => 'approved',
+            'created_at' => now(),
+        ]);
+
         return redirect()->route('approve.index')
             ->with('success', 'Request approved!');
     }
@@ -46,8 +54,24 @@ class ApprovalController extends Controller
         $sqlRequest->status = 'rejected';
         $sqlRequest->save();
 
+        AuditLog::create([
+            'done_by' => auth()->id(),
+            'request_id' => $sqlRequest->id,
+            'action' => 'rejected',
+            'created_at' => now(),
+        ]);
+
         return redirect()->route('approve.index')
             ->with('success', 'Request rejected!');
 
+    }
+
+    public function auditLogs()
+    {
+        $logs = AuditLog::with(['user', 'sqlRequest'])
+            ->latest()
+            ->get();
+
+        return view('audit-logs', compact('logs'));
     }
 }

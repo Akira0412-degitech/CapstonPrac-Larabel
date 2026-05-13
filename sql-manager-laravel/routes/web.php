@@ -24,9 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/approve', [ApprovalController::class, 'index'])->name('approve.index');
     Route::post('/approve/{id}', [ApprovalController::class, 'approve'])->name('approve.approve');
     Route::post('/reject/{id}', [ApprovalController::class, 'reject'])->name('approve.reject');
+    Route::get('/audit-logs', [ApprovalController::class, 'auditLogs'])->name('audit-logs.index');
 
     Route::get('/my-requests', [SqlRequestController::class, 'myRequests'])->name('my-requests.index');
     
 });
+
+Route::middleware('auth')->get('/api/columns', [SqlRequestController::class, 'columns'])
+    ->name('submit.columns');
 
 require __DIR__.'/auth.php';

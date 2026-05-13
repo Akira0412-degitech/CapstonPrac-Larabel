@@ -2,48 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SqlRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\SqlRequest;
+use Illuminate\Support\Facades\Schema;
 
 class SqlRequestController extends Controller
 {
-    // GET /submit
-    // → テーブル一覧を取得してビューに渡す
+    private function getAppDatabaseName(): string
+    {
+        return (string) config('database.connections.mysql.database');
+    }
+
+    private function getAllowedTables(): array
+    {
+        $database = $this->getAppDatabaseName();
+
+        return DB::table('information_schema.tables')
+            ->where('table_schema', $database)
+            ->where('table_type', 'BASE TABLE')
+            ->orderBy('table_name')
+            ->selectRaw('table_name as table_name_alias')
+            ->pluck('table_name_alias')
+            ->all();
+    }
+
     public function index()
     {
-        // DBのテーブル一覧を取得
-        // ヒント：DB::select('SHOW TABLES')
-        $tables = DB::select('SHOW TABLES');
-        
+        $tables = $this->getAllowedTables();
+
         return view('submit', compact('tables'));
     }
 
-    // POST /submit
-    // → 申請をDBに保存する
+    public function columns(Request $request)
+    {
+        $validated = $request->validate([
+            'table' => ['required', 'string'],
+        ]);
+
+        $table = $validated['table'];
+        $tables = $this->getAllowedTables();
+        if (! in_array($table, $tables, true)) {
+            return response()->json(['message' => 'Unknown table'], 422);
+        }
+
+        return response()->json(Schema::getColumnListing($table));
+    }
+
     public function store(Request $request)
     {
-        // バリデーション
         $request->validate([
             'sql_text' => 'required|string',
         ]);
 
-        // DBに保存
-        // ヒント：SqlRequest::create()
         SqlRequest::create([
-            'user_id'  => auth()->id(),  // ログイン中のユーザーID
-            'sql_text' => $request->sql_text,  // フォームから送られたSQL
-            'status'   => 'pending',
+            'user_id' => auth()->id(),
+            'sql_text' => $request->sql_text,
+            'status' => 'pending',
         ]);
 
         return redirect()->route('submit.index')
             ->with('success', 'Request submitted successfully!');
     }
 
-    public function myRequests(){
+    public function myRequests()
+    {
         $myRequests = SqlRequest::where('user_id', auth()->id())
-        ->orderBy('created_at','desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('my-requests', compact('myRequests'));
     }
