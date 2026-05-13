@@ -18,7 +18,9 @@
                                 <tr class="border-b">
                                     <th class="text-left p-2">SQL</th>
                                     <th class="text-left p-2">Status</th>
-                                    <th class="text-left p-2">Submitted</th>
+                                    <th class="text-left p-2">Submitted At</th>
+                                    <th class="text-left p-2">Reviewed By</th>
+                                    <th class="text-left p-2">Reviewed At</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -35,6 +37,12 @@
                                         @endif
                                     </td>
                                     <td class="p-2">{{ $req->created_at->format('Y-m-d H:i') }}</td>
+                                    <td class="p-2">
+                                        {{ $req->decisionLog?->user?->name ?? '-' }}
+                                    </td>
+                                    <td class="p-2">
+                                        {{ $req->decisionLog?->created_at?->format('Y-m-d H:i') ?? '-' }}
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>

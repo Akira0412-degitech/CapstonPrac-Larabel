@@ -22,16 +22,16 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b">
-                                    <th class="text-left p-2">User</th>
+                                    <th class="text-left p-2">Requester</th>
                                     <th class="text-left p-2">SQL</th>
-                                    <th class="text-left p-2">Submitted</th>
+                                    <th class="text-left p-2">Submitted At</th>
                                     <th class="text-left p-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($pendingRequests as $req)
                                 <tr class="border-b">
-                                    <td class="p-2">{{ $req->user->name }}</td>
+                                    <td class="p-2">{{ $req->user->name ?? 'Unknown' }}</td>
                                     <td class="p-2 font-mono">{{ $req->sql_text }}</td>
                                     <td class="p-2">{{ $req->created_at->format('Y-m-d H:i') }}</td>
                                     <td class="p-2 flex gap-2">

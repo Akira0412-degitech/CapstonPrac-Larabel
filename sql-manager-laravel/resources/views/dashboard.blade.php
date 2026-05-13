@@ -30,6 +30,10 @@
                                class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
                                 Approval Queue
                             </a>
+                            <a href="{{ route('audit-logs.index') }}"
+                               class="bg-indigo-500 text-white px-6 py-2 rounded hover:bg-indigo-600">
+                                Audit Logs
+                            </a>
                         @endif
                     </div>
                 </div>

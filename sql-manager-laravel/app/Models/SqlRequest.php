@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SqlRequest extends Model
 {
@@ -13,8 +16,20 @@ class SqlRequest extends Model
         'status',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'request_id');
+    }
+
+    public function decisionLog(): HasOne
+    {
+        return $this->hasOne(AuditLog::class, 'request_id')
+            ->whereIn('action', ['approved', 'rejected'])
+            ->latestOfMany();
     }
 }

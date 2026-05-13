@@ -68,6 +68,7 @@ class SqlRequestController extends Controller
     public function myRequests()
     {
         $myRequests = SqlRequest::where('user_id', auth()->id())
+            ->with(['decisionLog.user'])
             ->orderBy('created_at', 'desc')
             ->get();
 

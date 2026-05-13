@@ -68,7 +68,11 @@ class ApprovalController extends Controller
 
     public function auditLogs()
     {
-        $logs = AuditLog::with(['user', 'sqlRequest'])
+        if (auth()->user()->role !== 'approver') {
+            abort(403);
+        }
+
+        $logs = AuditLog::with(['user', 'sqlRequest.user'])
             ->latest()
             ->get();
 
